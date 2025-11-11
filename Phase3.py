@@ -52,4 +52,10 @@ def start_game():
             print("Thank you for playing!")
             break
 
-    #Go to phase 2
+#LILIAN CODE HERE:
+#######################################################
+# # If no lives left
+
+
+#End of the code
+start_game()
