@@ -1,7 +1,3 @@
-<<<<<<< HEAD
-#Display a welcome message and ask the user to select a level of difficulty
-print("Welcome to the Hangman Game")
-=======
 import random
 import string
 
@@ -69,10 +65,11 @@ def display_welcome():
     print("=============================================")
     print("Guess the word before you run out of lives!")
     print()
-
+    
 # --- Main Program ---
 def main():
     display_welcome()
+
     valid_levels = {'E', 'M', 'H'}
 
     while True:
@@ -81,20 +78,18 @@ def main():
             break
         # Display "try again" message for invalid input
         print("🛑 Invalid level choice. Please enter E, M, or H. Try again.")
-        
+
     word = load_word(level)
-
+    initial_lives = 6
     # Initialize game state variables
-    remaining_lives = 6
     is_running = True
-
     hint = ["_"] * len(word)
     
     # THIS IS THE CRITICAL FIX: Tracks ALL guesses throughout the game
     guessed_letters = [] 
     
     print("-" * 30)
-    print(f"The word has {len(word)} letters. Remaining lives is: {remaining_lives}")
+    print(f"The word has {len(word)} letters. Remaining lives is: {initial_lives}")
 
     while is_running:
         display_hint(hint)
@@ -103,25 +98,51 @@ def main():
         # Display the word for testing purposes (remove later)
         print(f"[TEST WORD: {word}]") 
         
-    # Start of Phase 2
-        # 1. Get and standardize user input here
-        
+        # 1. Get and standardize input
+        user_input = input("Enter a letter:").strip().upper()
         
         # 2. Input Validation Block
         
-            # Must be exactly one character
+        # Must be exactly one character
+        if len(user_input) != 1:
+            print("🛑 Invalid input. Please enter **only one** character.")
+            continue
             
-                
-            # Must be a letter (not a number or special character)
+        # Must be a letter (not a number or special character)
+        if not user_input.isalpha():
+            print(f"🛑 Invalid input. '{user_input}' is not a letter. Try again.")
+            continue
         
-       #if valid input proceed here
-       # You must update the alphabet by passing the new list of guessed letters. By calling the display_alphabet() function
+        # Input Validation
+        if len(user_input) != 1 or not user_input.isalpha():
+            print("Invalid input. Please enter a single letter.")
+            continue
+            
+        if user_input in guessed_letters:
+            print(f"You already guessed the letter '{user_input}'. Try again.")
+            continue
+            
+        # Add the valid new guess to the tracking list
+        guessed_letters.append(user_input)
       
-     # End of Phase 2
-     
-        is_running = False
-     
+        # Check if the guess is correct
+        if user_input in word:  
+            print(f"Correct! '{user_input}' is in the word.")
+            # Update the hint
+            for i in range(len(word)):
+                if word[i] == user_input:
+                    hint[i] = user_input
+        else:
+            print(f"Incorrect. '{user_input}' is not in the word.")
+        
+        # Win Condition Check
+        if "_" not in hint:
+            print("\n" + "="*40)
+            print(f"🥳 CONGRATULATIONS! You guessed the word: **{word}**")
+            print("="*40)
+            is_running = False
+        
+        # (Optional: You would add a life/guess counter and loss condition here)
         
 if __name__ == "__main__":
     main()
->>>>>>> 63afb7e (Updated phase 1)
