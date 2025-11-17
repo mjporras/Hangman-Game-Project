@@ -74,52 +74,125 @@ HANGMAN_PICS = [
 ]
 
 # -------------------------------------------
-# Word lists by difficulty + categories
+# FULL CATEGORY SYSTEM
 # -------------------------------------------
-EASY_WORDS = [
-    "Apple", "Banana", "Orange", "Pear", "Peach", "Grapes", "Mango", "Kiwi",
-    "Pineapple", "Watermelon", "Blueberry", "Strawberry", "Raspberry",
-    "Cherry", "Lemon", "Lime"
-]
+CATEGORIES = {
+    "fruits": {
+        "easy": [
+            "Apple", "Banana", "Orange", "Pear", "Peach", "Grapes", "Mango",
+            "Kiwi", "Pineapple", "Watermelon", "Blueberry", "Strawberry",
+            "Raspberry", "Cherry", "Lemon", "Lime"
+        ],
+        "medium": [
+            "Papaya", "Dragonfruit", "Lychee", "Persimmon", "Starfruit",
+            "Passionfruit", "Guava", "Fig", "Pomegranate", "Tamarind",
+            "Durian", "Longan", "Jackfruit"
+        ],
+        "hard": [
+            "Boysenberry", "Clementine", "Huckleberry", "Elderberry",
+            "Mulberry", "Gooseberry", "Ugli fruit", "Feijoa",
+            "Satsuma", "Jabuticaba"
+        ]
+    },
 
-MEDIUM_WORDS = [
-    "Papaya", "Dragonfruit", "Lychee", "Persimmon", "Starfruit",
-    "Passionfruit", "Guava", "Fig", "Pomegranate", "Tamarind", "Durian",
-    "Longan", "Jackfruit"
-]
+    "animals": {
+        "easy": [
+            "Cat", "Dog", "Cow", "Duck", "Fish", "Frog", "Lion", "Goat",
+            "Bear", "Wolf", "Tiger", "Horse"
+        ],
+        "medium": [
+            "Giraffe", "Leopard", "Panther", "Buffalo", "Cheetah",
+            "Kangaroo", "Ostrich", "Dolphin", "Turtle", "Penguin"
+        ],
+        "hard": [
+            "Hippopotamus", "Rhinoceros", "Axolotl", "Chameleon",
+            "Armadillo", "Porcupine", "Walrus", "Flamingo"
+        ]
+    },
 
-HARD_WORDS = [
-    "Boysenberry", "Clementine", "Huckleberry", "Elderberry", "Mulberry",
-    "Gooseberry", "Ugli fruit", "Feijoa", "Satsuma", "Jabuticaba"
-]
+    "cities": {
+        "easy": [
+            "Paris", "London", "Tokyo", "Berlin", "Rome", "Oslo",
+            "Dubai", "Madrid", "Dublin", "Miami"
+        ],
+        "medium": [
+            "Budapest", "Barcelona", "Stockholm", "Melbourne",
+            "Vancouver", "Istanbul", "Brussels", "Shanghai"
+        ],
+        "hard": [
+            "Thiruvananthapuram", "Reykjavik", "Guadalajara",
+            "Liechtenstein", "Djibouti", "Chattanooga", "Yokohama"
+        ]
+    },
+
+    "professions": {
+        "easy": [
+            "Chef", "Nurse", "Farmer", "Pilot", "Teacher",
+            "Doctor", "Driver", "Artist", "Baker", "Singer"
+        ],
+        "medium": [
+            "Engineer", "Pharmacist", "Designer", "Electrician",
+            "Carpenter", "Journalist", "Mechanic", "Plumber"
+        ],
+        "hard": [
+            "Archaeologist", "Astrophysicist", "Neurosurgeon",
+            "Paleontologist", "Cryptographer", "Cartographer"
+        ]
+    }
+}
 
 CATEGORY_HINTS = {
-    "easy": "Category: Common fruits you see in everyday life.",
-    "medium": "Category: Exotic or tropical fruits!",
-    "hard": "Category: Rare, unusual, or hard-to-spell fruits!"
+    "fruits": "Category: Fruits — common, exotic, or very rare types!",
+    "animals": "Category: Living creatures from the animal kingdom!",
+    "cities": "Category: Well-known cities around the world!",
+    "professions": "Category: Jobs and occupations people do!"
 }
 
 # -------------------------------------------
-# Select difficulty + choose word + hint
+# SELECT CATEGORY + DIFFICULTY
 # -------------------------------------------
-def choose_difficulty():
+def choose_category_and_word():
     print("Welcome to Hangman!")
-    print("Select difficulty:")
+    print("\nSelect a category:")
+    
+    category_list = list(CATEGORIES.keys())
+    
+    for i, cat in enumerate(category_list, start=1):
+        print(f"{i}. {cat.title()}")
+
+    while True:
+        cat_choice = input("\nEnter category number: ")
+
+        if cat_choice.isdigit() and 1 <= int(cat_choice) <= len(category_list):
+            chosen_category = category_list[int(cat_choice) - 1]
+            break
+        else:
+            print("Invalid category choice.")
+
+    print("\nSelect difficulty:")
     print("1. Easy")
     print("2. Medium")
     print("3. Hard")
 
     while True:
-        choice = input("Enter 1, 2, or 3: ")
+        diff_choice = input("Enter difficulty number: ")
 
-        if choice == "1":
-            return random.choice(EASY_WORDS).lower(), CATEGORY_HINTS["easy"]
-        elif choice == "2":
-            return random.choice(MEDIUM_WORDS).lower(), CATEGORY_HINTS["medium"]
-        elif choice == "3":
-            return random.choice(HARD_WORDS).lower(), CATEGORY_HINTS["hard"]
+        if diff_choice == "1":
+            difficulty = "easy"
+            break
+        elif diff_choice == "2":
+            difficulty = "medium"
+            break
+        elif diff_choice == "3":
+            difficulty = "hard"
+            break
         else:
-            print("Invalid input.")
+            print("Invalid difficulty.")
+
+    word = random.choice(CATEGORIES[chosen_category][difficulty]).lower()
+    hint = CATEGORY_HINTS[chosen_category]
+
+    return word, hint
 
 
 # -------------------------------------------
@@ -128,10 +201,7 @@ def choose_difficulty():
 def initialize_game(word, category_hint):
     alphabet = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     lives = 6
-    guessed = ["_" for _ in word]
-    
-    if " " in word:
-        guessed = ["_" if c.isalpha() else c for c in word]
+    guessed = ["_" if c.isalpha() else c for c in word]
 
     length_hint = f"The word has {len(word)} characters."
     final_hint = category_hint + " | " + length_hint
@@ -140,10 +210,9 @@ def initialize_game(word, category_hint):
 
 
 # -------------------------------------------
-# Display everything including ASCII art
+# Display everything including ASCII
 # -------------------------------------------
 def display_state(hint, alphabet, lives, guessed):
-     # Clear screen so ASCII hangman stays in the same place
     os.system("cls" if os.name == "nt" else "clear")
     print(HANGMAN_PICS[6-lives])
     print(hint)
@@ -161,7 +230,7 @@ def validate_input(letter):
 
 
 # -------------------------------------------
-# Check guess
+# Process guess
 # -------------------------------------------
 def process_guess(letter, word, guessed, lives):
     letter = letter.lower()
@@ -179,7 +248,7 @@ def process_guess(letter, word, guessed, lives):
 
 
 # -------------------------------------------
-# Check end-game
+# Check end
 # -------------------------------------------
 def check_game_end(guessed, lives, word):
     if "_" not in guessed:
@@ -200,11 +269,11 @@ def play_again():
 
 
 # -------------------------------------------
-# MAIN GAME
+# MAIN GAME LOOP
 # -------------------------------------------
 def hangman():
     while True:
-        word, category_hint = choose_difficulty()
+        word, category_hint = choose_category_and_word()
         alphabet, lives, guessed, hint = initialize_game(word, category_hint)
 
         while True:
@@ -227,6 +296,7 @@ def hangman():
         if not play_again():
             print("Thank you for playing!")
             break
+
 
 # Run the game
 hangman()
