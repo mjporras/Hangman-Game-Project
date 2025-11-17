@@ -70,7 +70,7 @@ def display_welcome():
 def main():
     display_welcome()
     valid_levels = {'E', 'M', 'H'}
-
+    
     while True:
         level = input("Select level of difficulty E(Easy), M(Medium), H(Hard):").strip().upper()
         if level in valid_levels:
