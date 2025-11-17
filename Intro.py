@@ -72,11 +72,11 @@ def main():
     valid_levels = {'E', 'M', 'H'}
 
     while True:
+        # Display "try again" message for invalid input
         level = input("Select level of difficulty E(Easy), M(Medium), H(Hard):").strip().upper()
         if level in valid_levels:
             break
-        # Display "try again" message for invalid input
-        print("🛑 Invalid level choice. Please enter E, M, or H. Try again.")
+        print("🛑 Invalid level choice. Please enter E, M, or H. Try again. \n")
         
     word = load_word(level)
 
@@ -99,24 +99,76 @@ def main():
         # Display the word for testing purposes (remove later)
         print(f"[TEST WORD: {word}]") 
         
-    # Start of Phase 2
-        # 1. Get and standardize user input here
-        
-        
-        # 2. Input Validation Block
+        # Start of Phase 2
+        # 1. Get and standardize user input here 
+        while True:
+            letter = input("Guess a letter: ").strip().upper()
+
+            # 2. Input Validation Block
         
             # Must be exactly one character
             
-                
+        
             # Must be a letter (not a number or special character)
         
-       #if valid input proceed here
-       # You must update the alphabet by passing the new list of guessed letters. By calling the display_alphabet() function
-      
-     # End of Phase 2
-     
-        is_running = False
-     
         
+            #if valid input proceed here
+        
+
+            # End of Phase 2
+
+            if letter in guessed_letters:
+                print(f"That letter {letter} was already used. Try with another one.")
+                continue
+
+            guessed_letters.append(letter)
+
+            #If letter is in the word
+
+            if letter in word:
+                for i in range(len(word)):
+                    if word[i] == letter:
+                        hint[i] = letter
+                print("Good guess! \n")
+                # Check if the word is complete after updating the hint
+                if "_" not in hint:
+                    print(f"You won! The word is: {word}")
+                    play_again = input("Do you want to play again? (yes/no): ")
+                    if play_again.lower() == "yes":
+                        # Reset game for a new round (but not the whole game)
+                        word = load_word(level)
+                        initial_lives = 6
+                        hint = ["_"] * len(word)
+                        guessed_letters.clear()
+                        print("-" * 30)
+                        print(f"The word has {len(word)} letters. Remaining lives is: {initial_lives}")
+                        break  # exit input loop to restart the round display
+                    else:
+                        print("Thank you for playing! \n")
+                        is_running = False
+                        break
+                # Since it was a correct guess, continue to next guess
+                continue
+
+            # Wrong guess case
+            initial_lives -= 1
+            print(f"Wrong guess! Remaining lives: {initial_lives} \n")
+            if initial_lives == 0:
+                print(f"Game Over! The word was: {word}")
+                play_again = input("Do you want to play again? (yes/no): ")
+                if play_again.lower() == "yes":
+                    # Reset game for a new round (but not the whole game)
+                    word = load_word(level)
+                    initial_lives = 6
+                    hint = ["_"] * len(word)
+                    guessed_letters.clear()
+                    print("-" * 30)
+                    print(f"The word has {len(word)} letters. Remaining lives is: {initial_lives}")
+                    break  # exit input loop to restart the round display
+                else:
+                    print("Thank you for playing! \n")
+                    is_running = False
+                    break
+
 if __name__ == "__main__":
     main()
