@@ -11,9 +11,9 @@ HANGMAN_PICS = [
     r"""
       +-------+
       |       |
-      O       |
-     /|\      |
-     / \      |
+              |
+              |
+              |
               |
     ================
     """,
@@ -21,8 +21,8 @@ HANGMAN_PICS = [
       +-------+
       |       |
       O       |
-     /|\      |
-     /        |
+              |
+              |
               |
     ================
     """,
@@ -30,7 +30,7 @@ HANGMAN_PICS = [
       +-------+
       |       |
       O       |
-     /|\      |
+      |       |
               |
               |
     ================
@@ -48,7 +48,7 @@ HANGMAN_PICS = [
       +-------+
       |       |
       O       |
-      |       |
+     /|\      |
               |
               |
     ================
@@ -57,17 +57,17 @@ HANGMAN_PICS = [
       +-------+
       |       |
       O       |
-              |
-              |
+     /|\      |
+     /        |
               |
     ================
     """,
     r"""
       +-------+
       |       |
-              |
-              |
-              |
+      O       |
+     /|\      |
+     / \      |
               |
     ================
     """
@@ -77,8 +77,11 @@ HANGMAN_PICS = [
 # SELECT CATEGORY + DIFFICULTY
 # -------------------------------------------
 def choose_category_and_word():
-    print("Welcome to Hangman!")
-    print("\nSelect a category:")
+    print("=============================================")
+    print("     🎉 Welcome to the Hangman Game! 🎉")
+    print("=============================================")
+    print("Guess the word before you run out of lives!")
+    print()
     
     category_list = list(CATEGORIES.keys())
     
@@ -86,7 +89,7 @@ def choose_category_and_word():
         print(f"{i}. {cat.title()}")
 
     while True:
-        cat_choice = input("\nEnter category number: ")
+        cat_choice = input("\nSelect the Category: ")
 
         if cat_choice.isdigit() and 1 <= int(cat_choice) <= len(category_list):
             chosen_category = category_list[int(cat_choice) - 1]
@@ -95,20 +98,20 @@ def choose_category_and_word():
             print("Invalid category choice.")
 
     print("\nSelect difficulty:")
-    print("1. Easy")
-    print("2. Medium")
-    print("3. Hard")
+    print("E. Easy")
+    print("M. Medium")
+    print("H. Hard")
 
     while True:
-        diff_choice = input("Enter difficulty number: ")
+        diff_choice = input("Enter difficulty level: ")
 
-        if diff_choice == "1":
+        if diff_choice == "E":
             difficulty = "easy"
             break
-        elif diff_choice == "2":
+        elif diff_choice == "M":
             difficulty = "medium"
             break
-        elif diff_choice == "3":
+        elif diff_choice == "H":
             difficulty = "hard"
             break
         else:
@@ -124,7 +127,7 @@ def choose_category_and_word():
 # Initialize game state
 # -------------------------------------------
 def initialize_game(word, category_hint):
-    alphabet = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    alphabet = list("ABCDEFGHIJKLMNOPQRSTUVWXYZ") 
     lives = 6
     guessed = ["_" if c.isalpha() else c for c in word]
 
@@ -161,11 +164,15 @@ def process_guess(letter, word, guessed, lives):
     letter = letter.lower()
 
     if letter in word:
-        print(f"Good job! '{letter}' is in the word.\n")
         for i, char in enumerate(word):
             if char == letter:
                 guessed[i] = letter
+        
+        print("Word:", " ".join(guessed))   # show updated word immediately
+        print(f"Good job! '{letter}' is in the word.\n")
+    
         return guessed, lives, True
+    
     else:
         print(f"'{letter}' is NOT in the word.\n")
         lives -= 1
