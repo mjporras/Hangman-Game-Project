@@ -101,26 +101,27 @@ def main():
         
     # Start of Phase 2
         # 1. Get and standardize user input here
-        guess = input("enter a letter: ").strip().upper()
+        guess = input("Enter a letter: ").strip().upper()
         
         # 2. Input Validation Block
         
             # Must be exactly one character
+
         if len(guess) != 1:
-            print("please enter only ONE character.")
+            print("Please enter only ONE character.")
             continue
                 
             # Must be a letter (not a number or special character)
         if not guess.isalpha():
-            print("please enter a LETTER (A-Z),")
+            print("Please enter a LETTER (A-Z),")
             continue
             # Must not have been guessed before 
         if guess in guessed_letters: 
-            print("you already guessed that letter, try again.")
+            print("You already guessed that letter, try again.")
             continue
 
             #if valid input proceed here
-        guessed.letters.append(guess)
+        guessed_letters.append(guess)
     
             # You must update the alphabet by passing the new list of guessed letters.
         display_alphabet(guessed_letters)
