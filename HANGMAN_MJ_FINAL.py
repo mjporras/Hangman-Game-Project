@@ -1,6 +1,8 @@
+
 import random
 from wordlist import WORD_BANK 
-#lilian
+
+#Lilian
 # Hangman ASCII art for 6 lives (index 0 = no wrong guesses)
 HANGMAN_STAGES = [
     """
@@ -75,7 +77,7 @@ def choose_category(): #Lilian
     for idx, cat in enumerate(categories, start=1):
         print(f"  {idx}. {cat.capitalize()}")
     while True:
-        choice = input("Enter the number of the category: ").strip()
+        choice = input("\nEnter the number of the category: ").strip()
         print("-"*50)
         if choice.isdigit():
             i = int(choice)
@@ -89,7 +91,7 @@ def choose_difficulty(): #Lilian
     for idx, lvl in enumerate(levels, start=1):
         print(f"  {idx}. {lvl.capitalize()}")
     while True:
-        choice = input("Enter the number of the difficulty: ").strip()
+        choice = input("\nEnter the number of the difficulty: ").strip()
         print("-"*50)
         if choice.isdigit():
             i = int(choice)
@@ -98,25 +100,20 @@ def choose_difficulty(): #Lilian
         print("Invalid input. Please enter 1, 2 or 3.")
 
 def display_alphabet(alphabet_list): #MJ
-    rows = []
-    per_row = 30
-    for start in range(0, 26, per_row):
-        rows.append(" ".join(alphabet_list[start:start+per_row]))
     print("\nAvailable letters:")
-    for r in rows:
-        print("  " + r)
+    print("  " + " ".join(alphabet_list))
 
-def display_hint(secret_word, revealed_positions): #MJ
-    hint = []
+def display_word(secret_word, revealed_positions): #MJ
+    word_state = [] #holds the current condition of the word (letters + underscores: guessed/revealed or not)
     for ch, revealed in zip(secret_word, revealed_positions):
         if ch == " ":
-            hint.append(" ")
+            word_state.append(" ")
         elif revealed:
-            hint.append(ch)
+            word_state.append(ch)
         else:
-            hint.append("_")
+            word_state.append("_")
     print("\nWord:")
-    print("  " + " ".join(hint))
+    print("  " + " ".join(word_state))
     print(secret_word) #FOR TESTING ONLY. DELETE IT LATER.
 
 def get_single_letter_guess(alphabet_list): #Flor
@@ -135,7 +132,7 @@ def get_single_letter_guess(alphabet_list): #Flor
             continue
         return guess
 
-def play_round(secret_word): #Valentina
+def play_round(secret_word): #Val
     secret_word = secret_word.upper()
     revealed = [False if ch != " " else True for ch in secret_word]
     lives = 6
@@ -145,7 +142,7 @@ def play_round(secret_word): #Valentina
     while True:
         print(HANGMAN_STAGES[wrong_guesses])
         display_alphabet(alphabet_list)
-        display_hint(secret_word, revealed)
+        display_word(secret_word, revealed) #changed hint to word
         print(f"\nLives remaining: {lives}")
 
         if all(revealed):
@@ -178,21 +175,55 @@ def play_round(secret_word): #Valentina
 def pick_word(category, difficulty): #MJ
     words = WORD_BANK.get(category, {}).get(difficulty, [])
     if not words:
+        print(f"⚠️  No words available for category '{category}' and difficulty '{difficulty}'. Using a default word instead.")
         return random.choice(["PYTHON", "HANGMAN", "COMPUTER"])
     return random.choice(words)
 
-def ask_play_again(): #Florencia
+def ask_play_again(): #Flor
     while True:
         choice = input("\nDo you want to play again? (Y/N): ").strip().upper()
         if choice in ("Y", "N"):
             return choice == "Y"
         print("Please enter Y or N.")
-        print("=============================================") #added
+        print("=============================================")
 
-def main(): #Everyone 
+def show_game_rules(): #
+    print("\n================ GAME RULES ================")
+    print("1. Choose a category and difficulty.")
+    print("2. Guess one letter at a time.")
+    print("3. Each wrong guess removes one life.")
+    print("4. You have 6 lives total.")
+    print("5. The game ends when you:")
+    print("   - Guess the full word (You win!)")
+    print("   - Lose all lives (Game over)")
+    print("=============================================\n")
+
+def start_menu(): #MJ
     print("=============================================")
     print("     🎉 Welcome to the Hangman Game! 🎉")
     print("=============================================")
+    print("1. View Game Rules")
+    print("2. Play the Game")
+    print("3. Exit")
+    while True:
+        choice = input("\nEnter your choice (1/2/3): ").strip()
+        print("-" * 50)
+        if choice == "1":
+            show_game_rules()
+            return start_menu()  # Return to menu after showing rules
+        elif choice == "2":
+            print("\nStarting game...\n")
+            return True
+        elif choice == "3":
+            print("\nThank you for visiting Hangman. Goodbye!")
+            return False
+        else:
+            print("Invalid choice. Please choose 1, 2, or 3.")
+
+def main(): #Everyone
+    proceed = start_menu()
+    if not proceed:
+        return  # Exit the program if player chose 3
     while True:
         category = choose_category()
         difficulty = choose_difficulty()
@@ -202,15 +233,15 @@ def main(): #Everyone
         won = play_round(secret_word)
         if won:
             print("\nYou won this round! 🎉")
-            print("=============================================") #added
+            print("=============================================")
         else:
             print("\nBetter luck next time.")
-            print("=============================================") #added
+            print("=============================================")
 
         if not ask_play_again():
             print("\nThank you for playing Hangman. Goodbye!")
             break
-        print("-" * 50) #added
+        print("-" * 50)
         print("\nStarting a new game...\n")
 
 if __name__ == "__main__":
