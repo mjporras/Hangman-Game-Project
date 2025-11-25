@@ -134,13 +134,12 @@ def save_scores(scores):
         for name, points in scores.items():
             file.write(f"{name}: {points}\n")
 
-def display_high_scores(scores):
-    print("\n================ HIGH SCORES ================")
+def display_scoreboard(scores):
+    print("\n================ SCOREBOARD ================")
     if not scores:
         print("No scores saved yet.")
         return
 
-    # Sort from highest to lowest
     sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
     for rank, (name, score) in enumerate(sorted_scores[:10], start=1):
@@ -174,7 +173,6 @@ def play_round(secret_word): #Val
     lives = 6
     wrong_guesses = 0
     alphabet_list = [chr(ord('A') + i) for i in range(26)]
-
     score = 0
     hint_used = False
 
@@ -277,7 +275,7 @@ def start_menu(): #MJ
     print("=============================================")
     print("1. View Game Rules")
     print("2. Play the Game")
-    print("3. View High Scores")
+    print("3. View Scoreboard")
     print("4. Reset Scores")
     print("5. Exit")
     while True:
@@ -291,7 +289,7 @@ def start_menu(): #MJ
             return True
         elif choice == "3":
             scores = load_scores()
-            display_high_scores(scores)
+            display_scoreboard(scores)
             return start_menu()
         elif choice == "4":
             reset_scores()
@@ -308,7 +306,7 @@ def main(): #Everyone
         return  # Exit the program if player chose 3
     scores = load_scores()
 
-    player_name = input("Enter your name: ").strip()
+    player_name = input("Enter your name: ").strip().upper()
     if player_name not in scores:
         scores[player_name] = 0  # First time player
     print(f"\nWelcome, {player_name}! Your current total score is {scores[player_name]}.\n")
