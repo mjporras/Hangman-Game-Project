@@ -115,6 +115,43 @@ def display_word(secret_word, revealed_positions): #MJ
     print("  " + " ".join(word_state))
     print(secret_word) #FOR TESTING ONLY. DELETE IT LATER.
 
+def load_scores():
+    """Load player scores from scores.txt and return them as a dictionary."""
+    scores = {}
+    try:
+        with open("scores.txt", "r") as file:
+            for line in file:
+                if ":" in line:
+                    name, value = line.strip().split(":")
+                    scores[name.strip()] = int(value.strip())
+    except FileNotFoundError:
+        pass
+    return scores
+
+def save_scores(scores):
+    """Save player scores to scores.txt."""
+    with open("scores.txt", "w") as file:
+        for name, points in scores.items():
+            file.write(f"{name}: {points}\n")
+
+def display_high_scores(scores):
+    print("\n================ HIGH SCORES ================")
+    if not scores:
+        print("No scores saved yet.")
+        return
+
+    # Sort from highest to lowest
+    sorted_scores = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+    for rank, (name, score) in enumerate(sorted_scores[:10], start=1):
+        print(f"{rank}. {name} — {score} pts")
+    print("=============================================")
+
+def reset_scores():
+    with open("scores.txt", "w") as file:
+        pass
+    print("\nAll scores have been reset!\n")
+
 def get_single_letter_guess(alphabet_list): #Flor
     while True:
         guess = input("Guess a letter (A-Z): ").strip().upper()
@@ -138,23 +175,42 @@ def play_round(secret_word): #Val
     wrong_guesses = 0
     alphabet_list = [chr(ord('A') + i) for i in range(26)]
 
+    score = 0
+    hint_used = False
+
+    def give_hint():
+        nonlocal score
+        hidden_positions = [i for i, shown in enumerate(revealed) if not shown]
+        if not hidden_positions:
+            print("No hints available, all letters already revealed.")
+            return
+
+        reveal_index = random.choice(hidden_positions)
+        revealed[reveal_index] = True
+
+        penalty = 20
+        score -= penalty
+        print(f"\n💡 Hint used! A letter has been revealed. (-{penalty} points)\n")
+
     while True:
         print(HANGMAN_STAGES[wrong_guesses])
         display_alphabet(alphabet_list)
         display_word(secret_word, revealed) #changed hint to word
         print(f"\nLives remaining: {lives}")
+        print(f"Current Score: {score}")
 
         if all(revealed):
             print("=============================================")
             print("🥳 CONGRATULATIONS! You guessed the word!")
             print("The secret word was:", secret_word)
-            return True
+            score += 50
+            return True, score
         
         if lives <= 0:
             print("=============================================")
             print("\n😞 You've run out of lives. Game over.")
             print("The secret word was:", secret_word)
-            return False
+            return False, score
 
         guess = get_single_letter_guess(alphabet_list)
         alphabet_list[ord(guess) - ord('A')] = '_'
@@ -164,12 +220,22 @@ def play_round(secret_word): #Val
                 if ch == guess:
                     revealed[i] = True
             print(f"Good! '{guess}' is in the word.")
+            score += 10
         else:
             print(f"Sorry, '{guess}' is NOT in the word.")
             wrong_guesses += 1
             lives -= 1
+            score -= 5
             if wrong_guesses > 6:
                 wrong_guesses = 6
+        
+            if lives == 2 and not hint_used:
+                print("=============================================")
+                want_hint = input("You're low on lives. \nDo you want a hint (-20 points)? (Y/N): \n").strip().upper()
+                print("=============================================")
+                if want_hint == "Y":
+                    give_hint()
+                    hint_used = True
 
 def pick_word(category, difficulty): #MJ
     words = WORD_BANK.get(category, {}).get(difficulty, [])
@@ -192,7 +258,15 @@ def show_game_rules(): #
     print("2. Guess one letter at a time.")
     print("3. Each wrong guess removes one life.")
     print("4. You have 6 lives total.")
-    print("5. The game ends when you:")
+    print("5. Points system:")
+    print("   - Correct letter: +10 points")
+    print("   - Incorrect letter guessed: -5 points")
+    print("   - Word guessed correctly: +50 points")
+    print("   - Using a hint: -20 points")
+    print("6. Hints:")
+    print("   - You can use a hint only when you have 2 lives remaining.")
+    print("   - The hint will reveal a random hidden letter.")
+    print("7. The game ends when you:")
     print("   - Guess the full word (You win!)")
     print("   - Lose all lives (Game over)")
     print("=============================================\n")
@@ -203,9 +277,11 @@ def start_menu(): #MJ
     print("=============================================")
     print("1. View Game Rules")
     print("2. Play the Game")
-    print("3. Exit")
+    print("3. View High Scores")
+    print("4. Reset Scores")
+    print("5. Exit")
     while True:
-        choice = input("\nEnter your choice (1/2/3): ").strip()
+        choice = input("\nEnter your choice (1/2/3/4/5): ").strip()
         print("-" * 50)
         if choice == "1":
             show_game_rules()
@@ -214,6 +290,13 @@ def start_menu(): #MJ
             print("\nStarting game...\n")
             return True
         elif choice == "3":
+            scores = load_scores()
+            display_high_scores(scores)
+            return start_menu()
+        elif choice == "4":
+            reset_scores()
+            return start_menu()
+        elif choice == "5":
             print("\nThank you for visiting Hangman. Goodbye!")
             return False
         else:
@@ -223,19 +306,33 @@ def main(): #Everyone
     proceed = start_menu()
     if not proceed:
         return  # Exit the program if player chose 3
+    scores = load_scores()
+
+    player_name = input("Enter your name: ").strip()
+    if player_name not in scores:
+        scores[player_name] = 0  # First time player
+    print(f"\nWelcome, {player_name}! Your current total score is {scores[player_name]}.\n")
+
     while True:
         category = choose_category()
         difficulty = choose_difficulty()
         secret_word = pick_word(category, difficulty)
         print(f"\nYou picked: Category = {category.capitalize()}, Difficulty = {difficulty.capitalize()}")
         print("Let's start!\n")
-        won = play_round(secret_word)
+        won, round_score = play_round(secret_word)
         if won:
             print("\nYou won this round! 🎉")
             print("=============================================")
         else:
             print("\nBetter luck next time.")
             print("=============================================")
+
+        print(f"Score for this round: {round_score}")
+
+        scores[player_name] += round_score
+        print(f"Your total score is now: {scores[player_name]}")
+        save_scores(scores)
+        print("=============================================")
 
         if not ask_play_again():
             print("\nThank you for playing Hangman. Goodbye!")
